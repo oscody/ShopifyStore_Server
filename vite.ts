@@ -14,10 +14,27 @@ export function log(message: string, source = "express") {
 // CORS middleware for API server
 export function setupCORS(app: Express) {
   app.use((req, res, next) => {
-    res.header(
-      "Access-Control-Allow-Origin",
-      process.env.FRONTEND_URL || "http://localhost:5173"
-    );
+    // Get the origin from the request
+    const origin = req.headers.origin;
+
+    // Define allowed origins
+    const allowedOrigins = [
+      "http://localhost:5173", // Development
+      "https://oscody.github.io", // GitHub Pages
+      process.env.FRONTEND_URL, // Custom frontend URL if set
+    ].filter(Boolean); // Remove undefined values
+
+    // Check if the origin is allowed
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin);
+    } else if (process.env.NODE_ENV === "development") {
+      // In development, allow localhost with any port
+      res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+    } else {
+      // In production, only allow specific domains
+      res.header("Access-Control-Allow-Origin", "https://oscody.github.io");
+    }
+
     res.header(
       "Access-Control-Allow-Methods",
       "GET, POST, PUT, DELETE, OPTIONS"
