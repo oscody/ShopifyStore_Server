@@ -16,6 +16,51 @@ const stripe = process.env.STRIPE_SECRET_KEY
   : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Simple health check endpoint (for load balancers, etc.)
+  app.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Detailed health check endpoint
+  app.get("/api/health", async (req, res) => {
+    try {
+      // Basic health check - you can add more sophisticated checks here
+      const healthStatus = {
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || "development",
+        version: process.env.npm_package_version || "1.0.0",
+        services: {
+          database: "unknown", // Will be updated below
+          stripe: stripe ? "configured" : "not_configured",
+        },
+      };
+
+      // Test database connection
+      try {
+        await storage.getCategories();
+        healthStatus.services.database = "connected";
+      } catch (error) {
+        healthStatus.services.database = "disconnected";
+        healthStatus.status = "unhealthy";
+      }
+
+      const statusCode = healthStatus.status === "healthy" ? 200 : 503;
+      res.status(statusCode).json(healthStatus);
+    } catch (error) {
+      console.error("Health check error:", error);
+      res.status(503).json({
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        error: "Health check failed",
+      });
+    }
+  });
+
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {
