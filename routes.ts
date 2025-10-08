@@ -79,6 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         search,
         category,
         status,
+        sort,
         limit = "50",
         offset = "0",
       } = req.query;
@@ -86,6 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         search: search as string,
         category: category as string,
         status: status as string,
+        sort: sort as string,
         limit: parseInt(limit as string),
         offset: parseInt(offset as string),
       });

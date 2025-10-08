@@ -14,7 +14,7 @@ import {
   type InsertOrderItem,
 } from "./schema";
 import { db } from "./db";
-import { eq, desc, asc, like, and, sql } from "drizzle-orm";
+import { eq, desc, asc, like, and, sql, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // Categories
@@ -26,6 +26,7 @@ export interface IStorage {
     search?: string;
     category?: string;
     status?: string;
+    sort?: string;
     limit?: number;
     offset?: number;
   }): Promise<{ products: Product[]; total: number }>;
@@ -75,11 +76,12 @@ export class DatabaseStorage implements IStorage {
       search?: string;
       category?: string;
       status?: string;
+      sort?: string;
       limit?: number;
       offset?: number;
     } = {}
   ): Promise<{ products: Product[]; total: number }> {
-    const { search, category, status, limit = 50, offset = 0 } = params;
+    const { search, category, status, sort, limit = 50, offset = 0 } = params;
 
     let query = db.select().from(products);
     let countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
@@ -87,7 +89,7 @@ export class DatabaseStorage implements IStorage {
     const conditions = [];
 
     if (search) {
-      const searchCondition = like(products.name, `%${search}%`);
+      const searchCondition = ilike(products.name, `%${search}%`);
       conditions.push(searchCondition);
     }
 
@@ -106,8 +108,29 @@ export class DatabaseStorage implements IStorage {
       countQuery = countQuery.where(whereClause);
     }
 
+    // Apply sorting
+    switch (sort) {
+      case "price-low":
+        query = query.orderBy(asc(products.price));
+        break;
+      case "price-high":
+        query = query.orderBy(desc(products.price));
+        break;
+      case "newest":
+        query = query.orderBy(desc(products.createdAt));
+        break;
+      case "popular":
+        // For now, use created date as popularity proxy
+        // In a real app, you'd track sales/views
+        query = query.orderBy(desc(products.createdAt));
+        break;
+      default:
+        query = query.orderBy(desc(products.createdAt));
+        break;
+    }
+
     const [productsResult, countResult] = await Promise.all([
-      query.orderBy(desc(products.createdAt)).limit(limit).offset(offset),
+      query.limit(limit).offset(offset),
       countQuery,
     ]);
 
