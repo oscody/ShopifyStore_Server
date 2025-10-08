@@ -32,7 +32,10 @@ export function setupCORS(app: Express) {
       res.header("Access-Control-Allow-Origin", "http://localhost:5173");
     } else {
       // In production, allow the first allowed origin as fallback
-      res.header("Access-Control-Allow-Origin", allowedOrigins[0] || "https://storefrontclient.netlify.app");
+      res.header(
+        "Access-Control-Allow-Origin",
+        allowedOrigins[0] || "https://storefrontclient.netlify.app"
+      );
     }
 
     res.header(
