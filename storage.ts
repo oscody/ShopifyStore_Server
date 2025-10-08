@@ -6,7 +6,6 @@ import {
   type Category,
   type Product,
   type Order,
-  type OrderItem,
   type OrderWithItems,
   type InsertCategory,
   type InsertProduct,
@@ -14,7 +13,7 @@ import {
   type InsertOrderItem,
 } from "./schema";
 import { db } from "./db";
-import { eq, desc, asc, like, and, sql, ilike } from "drizzle-orm";
+import { eq, desc, asc, and, sql, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // Categories
@@ -104,28 +103,28 @@ export class DatabaseStorage implements IStorage {
     if (conditions.length > 0) {
       const whereClause =
         conditions.length === 1 ? conditions[0] : and(...conditions);
-      query = query.where(whereClause);
-      countQuery = countQuery.where(whereClause);
+      query = query.where(whereClause) as any;
+      countQuery = countQuery.where(whereClause) as any;
     }
 
     // Apply sorting
     switch (sort) {
       case "price-low":
-        query = query.orderBy(asc(products.price));
+        query = query.orderBy(asc(products.price)) as any;
         break;
       case "price-high":
-        query = query.orderBy(desc(products.price));
+        query = query.orderBy(desc(products.price)) as any;
         break;
       case "newest":
-        query = query.orderBy(desc(products.createdAt));
+        query = query.orderBy(desc(products.createdAt)) as any;
         break;
       case "popular":
         // For now, use created date as popularity proxy
         // In a real app, you'd track sales/views
-        query = query.orderBy(desc(products.createdAt));
+        query = query.orderBy(desc(products.createdAt)) as any;
         break;
       default:
-        query = query.orderBy(desc(products.createdAt));
+        query = query.orderBy(desc(products.createdAt)) as any;
         break;
     }
 
@@ -200,8 +199,8 @@ export class DatabaseStorage implements IStorage {
     let countQuery = db.select({ count: sql<number>`count(*)` }).from(orders);
 
     if (status) {
-      query = query.where(eq(orders.status, status));
-      countQuery = countQuery.where(eq(orders.status, status));
+      query = query.where(eq(orders.status, status)) as any;
+      countQuery = countQuery.where(eq(orders.status, status)) as any;
     }
 
     const [ordersResult, countResult] = await Promise.all([

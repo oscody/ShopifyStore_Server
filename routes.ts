@@ -11,13 +11,13 @@ import { z } from "zod";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2023-10-16",
+      apiVersion: "2025-09-30.clover",
     })
   : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple health check endpoint (for load balancers, etc.)
-  app.get("/health", (req, res) => {
+  app.get("/health", (_req, res) => {
     res.status(200).json({
       status: "ok",
       timestamp: new Date().toISOString(),
@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Detailed health check endpoint
-  app.get("/api/health", async (req, res) => {
+  app.get("/api/health", async (_req, res) => {
     try {
       // Basic health check - you can add more sophisticated checks here
       const healthStatus = {
@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Categories
-  app.get("/api/categories", async (req, res) => {
+  app.get("/api/categories", async (_req, res) => {
     try {
       const categories = await storage.getCategories();
       res.json(categories);
@@ -262,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard stats
-  app.get("/api/stats", async (req, res) => {
+  app.get("/api/stats", async (_req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);
