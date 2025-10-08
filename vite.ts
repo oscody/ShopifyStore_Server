@@ -20,6 +20,7 @@ export function setupCORS(app: Express) {
     // Define allowed origins
     const allowedOrigins = [
       "http://localhost:5173", // Development
+      "https://oscody.github.io", // GitHub Pages
       "https://storefrontclient.netlify.app", // Netlify deployment
       process.env.FRONTEND_URL, // Custom frontend URL if set
     ].filter(Boolean); // Remove undefined values
@@ -34,7 +35,7 @@ export function setupCORS(app: Express) {
       // In production, allow the first allowed origin as fallback
       res.header(
         "Access-Control-Allow-Origin",
-        allowedOrigins[0] || "https://storefrontclient.netlify.app"
+        allowedOrigins[0] || "https://oscody.github.io"
       );
     }
 
