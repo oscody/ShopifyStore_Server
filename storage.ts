@@ -393,8 +393,8 @@ export class DatabaseStorage implements IStorage {
     return {
       revenue: Number(revenueResult.total) || 0,
       orders: revenueResult.count || 0,
-      customers: customersResult[0].count || 0,
-      lowStock: lowStockResult[0].count || 0,
+      customers: customersResult.count || 0,
+      lowStock: lowStockResult.count || 0,
     };
   }
 }
